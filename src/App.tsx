@@ -3,7 +3,7 @@ import { Header } from './components/Header';
 import { PersonaSelector } from './components/PersonaSelector';
 import { ChatContainer } from './components/ChatContainer';
 import { SettingsModal } from './components/SettingsModal';
-import { streamChatResponse, type ChatMessage } from './utils/gemini';
+import { streamChatResponse, streamChatResponseProxy, type ChatMessage } from './utils/gemini';
 
 function App() {
   // Load state from localStorage if available
@@ -31,6 +31,23 @@ function App() {
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [useProxy, setUseProxy] = useState<boolean>(false);
+
+  // Check if server-side proxy is available
+  useEffect(() => {
+    async function checkProxyConfig() {
+      try {
+        const response = await fetch('/api/config');
+        if (response.ok) {
+          const data = await response.json();
+          setUseProxy(!!data.useProxy);
+        }
+      } catch (err) {
+        console.log("No serverless proxy detected, falling back to client-side API calls.");
+      }
+    }
+    checkProxyConfig();
+  }, []);
 
   // Sync active persona to localStorage
   useEffect(() => {
@@ -66,8 +83,8 @@ function App() {
   const handleSendMessage = async (text: string) => {
     if (!text.trim()) return;
 
-    // Check if API Key is missing
-    if (!apiKey) {
+    // Check if API Key is missing and proxy is not enabled
+    if (!useProxy && !apiKey) {
       setIsSettingsOpen(true);
       return;
     }
@@ -108,25 +125,35 @@ function App() {
 
     try {
       let currentText = '';
-      await streamChatResponse(
-        apiKey,
-        activePersona,
-        currentHistorySnapshot,
-        text,
-        (chunk) => {
-          currentText += chunk;
-          // Update the streaming model message content
-          if (activePersona === 'hitesh') {
-            setHiteshHistory(prev => 
-              prev.map(m => m.id === modelMessageId ? { ...m, content: currentText } : m)
-            );
-          } else {
-            setPiyushHistory(prev => 
-              prev.map(m => m.id === modelMessageId ? { ...m, content: currentText } : m)
-            );
-          }
+      const onChunkCallback = (chunk: string) => {
+        currentText += chunk;
+        if (activePersona === 'hitesh') {
+          setHiteshHistory(prev => 
+            prev.map(m => m.id === modelMessageId ? { ...m, content: currentText } : m)
+          );
+        } else {
+          setPiyushHistory(prev => 
+            prev.map(m => m.id === modelMessageId ? { ...m, content: currentText } : m)
+          );
         }
-      );
+      };
+
+      if (useProxy) {
+        await streamChatResponseProxy(
+          activePersona,
+          currentHistorySnapshot,
+          text,
+          onChunkCallback
+        );
+      } else {
+        await streamChatResponse(
+          apiKey,
+          activePersona,
+          currentHistorySnapshot,
+          text,
+          onChunkCallback
+        );
+      }
     } catch (error: any) {
       console.error(error);
       const errorText = `\n\n*(Error: ${error.message || "Something went wrong. Please check your API key."})*`;
@@ -208,7 +235,7 @@ function App() {
           activePersona={activePersona}
           onSendMessage={handleSendMessage}
           isGenerating={isGenerating}
-          apiKeyMissing={!apiKey}
+          apiKeyMissing={!useProxy && !apiKey}
           onOpenSettings={() => setIsSettingsOpen(true)}
         />
       </main>
@@ -220,6 +247,7 @@ function App() {
         apiKey={apiKey}
         onSaveKey={handleSaveKey}
         onClearHistory={handleClearHistory}
+        useProxy={useProxy}
       />
     </div>
   );

@@ -103,3 +103,60 @@ export async function streamChatResponse(
     throw new Error(errorMessage);
   }
 }
+
+/**
+ * Streams the response from the serverless proxy /api/chat.
+ */
+export async function streamChatResponseProxy(
+  persona: 'hitesh' | 'piyush',
+  history: ChatMessage[],
+  newMessage: string,
+  onChunk: (text: string) => void
+): Promise<string> {
+  try {
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ persona, history, message: newMessage }),
+    });
+
+    if (!response.ok) {
+      let errorMessage = "An error occurred while calling the server proxy.";
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.error || errorMessage;
+      } catch (_) {
+        try {
+          const rawText = await response.text();
+          if (rawText) errorMessage = rawText;
+        } catch (_) {}
+      }
+      throw new Error(errorMessage);
+    }
+
+    const reader = response.body?.getReader();
+    if (!reader) {
+      throw new Error("No response stream available from the server.");
+    }
+
+    const decoder = new TextDecoder();
+    let fullResponse = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const chunkText = decoder.decode(value, { stream: true });
+      fullResponse += chunkText;
+      onChunk(chunkText);
+    }
+
+    return fullResponse;
+  } catch (error: any) {
+    console.error("Proxy Chat Error:", error);
+    throw new Error(error.message || "Something went wrong while communicating with the proxy server.");
+  }
+}
+

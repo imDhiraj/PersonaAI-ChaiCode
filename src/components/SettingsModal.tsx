@@ -7,6 +7,7 @@ interface SettingsModalProps {
   apiKey: string;
   onSaveKey: (key: string) => void;
   onClearHistory: () => void;
+  useProxy?: boolean;
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -15,6 +16,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   apiKey,
   onSaveKey,
   onClearHistory,
+  useProxy = false,
 }) => {
   const [keyInput, setKeyInput] = useState(apiKey);
   const [showKey, setShowKey] = useState(false);
@@ -49,6 +51,25 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             <label className="form-label" htmlFor="apiKeyInput">
               Google Gemini API Key
             </label>
+            {useProxy && (
+              <div 
+                style={{ 
+                  backgroundColor: 'rgba(16, 185, 129, 0.1)', 
+                  border: '1px solid rgba(16, 185, 129, 0.2)', 
+                  borderRadius: '6px', 
+                  padding: '0.75rem', 
+                  marginBottom: '1rem',
+                  fontSize: '0.85rem',
+                  color: '#10b981',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}
+              >
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10b981' }}></div>
+                <span>Secure server-side API Key is active. You do not need to provide a custom key.</span>
+              </div>
+            )}
             <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
               <input
                 id="apiKeyInput"

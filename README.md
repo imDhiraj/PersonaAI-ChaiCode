@@ -34,7 +34,7 @@ This project simulates their distinctive speaking styles, vocabulary, pedagogica
 ### 1. Clone the repository
 ```bash
 git clone <repository-url>
-cd GenAI26
+cd PersonaAI-ChaiCode
 ```
 
 ### 2. Install dependencies
@@ -43,22 +43,18 @@ npm install
 ```
 
 ### 3. Configure Gemini API Key
-You can configure your API key in **one of two ways**:
+Configure your API key in one of the following ways:
 
-#### Method A: UI Settings (Recommended)
+#### Method A: Local UI Settings (Best for local testing / zero server cost)
 1. Run the app and click the **Settings Cog icon** in the top-right corner.
 2. Paste your Google Gemini API Key (get one free from [Google AI Studio](https://aistudio.google.com/)).
 3. Click **Save Configuration**. The key is stored locally in your browser's `localStorage` and never leaves your machine.
 
-#### Method B: Environment Variable
-1. Create a copy of the environmental template:
-   ```bash
-   copy .env.example .env
-   ```
-2. Open `.env` and enter your key:
-   ```env
-   VITE_GEMINI_API_KEY=AIzaSyYourGeminiApiKeyHere
-   ```
+#### Method B: Secure Serverless Proxy (Recommended for Production Deployment)
+To prevent your API key from being compiled into the client-side JavaScript bundle and exposed to the public, do NOT use `VITE_` variables in production. Instead, utilize the built-in serverless backend proxy (Vercel/Netlify Edge functions):
+1. Rename the variable on your hosting dashboard (e.g., Vercel, Netlify) to **`GEMINI_API_KEY`** (without the `VITE_` prefix).
+2. The serverless functions in `/api/config` and `/api/chat` will run on the server side, keeping your key completely hidden.
+3. The frontend dynamically detects the serverless endpoint and routes requests through `/api/chat` securely.
 
 ### 4. Run the development server
 ```bash
@@ -66,11 +62,12 @@ npm run dev
 ```
 Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-### 5. Build for Production
+### 5. Build and Deploy for Production
 ```bash
 npm run build
 ```
-Generates a static web build in the `dist/` directory, ready to be deployed to Vercel, Netlify, or GitHub Pages.
+Generates a static web build in the `dist/` directory.
+*   **Vercel Deployments**: The project is structured with an `/api` directory. Vercel automatically detects this and deploys `/api/config` and `/api/chat` as Serverless Edge Functions. Make sure to define `GEMINI_API_KEY` in your Vercel Project Environment Variables.
 
 ---
 
