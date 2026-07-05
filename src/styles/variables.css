@@ -1,0 +1,56 @@
+/* Global Theme variables */
+:root {
+  /* Common transitions */
+  --theme-transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                      color 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                      border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                      box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Font Families */
+  --font-display: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', source-code-pro, Menlo, Monaco, Consolas, monospace;
+}
+
+/* Hitesh Persona: Warm Amber & Cozy Cocoa Vibe */
+.theme-hitesh {
+  --bg-primary: #120e0c;
+  --bg-secondary: #1c1512;
+  --bg-tertiary: #261d19;
+  --bg-chat-bubble-user: #d97706;
+  --user-bubble-gradient: linear-gradient(135deg, #d97706 0%, #92400e 100%);
+  --bg-chat-bubble-model: #1c1512;
+  --text-primary: #f5efe6;
+  --text-secondary: #d6cbc4;
+  --text-muted: #968177;
+  --accent: #f59e0b;
+  --accent-rgb: 245, 158, 11;
+  --accent-hover: #fbbf24;
+  --border-color: #342721;
+  --glow-color: rgba(245, 158, 11, 0.2);
+  --header-gradient: linear-gradient(135deg, #241a15 0%, #120e0c 100%);
+  --sidebar-gradient: linear-gradient(180deg, #1c1512 0%, #0e0a08 100%);
+  --card-border-glow: 0 0 20px rgba(245, 158, 11, 0.15);
+  --welcome-bg: radial-gradient(circle at top right, rgba(245, 158, 11, 0.1), transparent 60%);
+}
+
+/* Piyush Persona: Neon Cyan, Indigo & Tech Obsidian Vibe */
+.theme-piyush {
+  --bg-primary: #030712;
+  --bg-secondary: #090d16;
+  --bg-tertiary: #0f172a;
+  --bg-chat-bubble-user: #06b6d4;
+  --user-bubble-gradient: linear-gradient(135deg, #06b6d4 0%, #0891b2 50%, #0369a1 100%);
+  --bg-chat-bubble-model: #090d16;
+  --text-primary: #f3f4f6;
+  --text-secondary: #abc0d4;
+  --text-muted: #627b94;
+  --accent: #06b6d4;
+  --accent-rgb: 6, 182, 212;
+  --accent-hover: #22d3ee;
+  --border-color: #1e293b;
+  --glow-color: rgba(6, 182, 212, 0.25);
+  --header-gradient: linear-gradient(135deg, #090e18 0%, #030712 100%);
+  --sidebar-gradient: linear-gradient(180deg, #090d16 0%, #010308 100%);
+  --card-border-glow: 0 0 20px rgba(6, 182, 212, 0.2);
+  --welcome-bg: radial-gradient(circle at top right, rgba(6, 182, 212, 0.1), transparent 60%);
+}
