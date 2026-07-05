@@ -18,7 +18,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onClearHistory,
   useProxy = false,
 }) => {
-  const [keyInput, setKeyInput] = useState(apiKey);
+  const [keyInput, setKeyInput] = useState(useProxy && !apiKey ? '' : apiKey);
   const [showKey, setShowKey] = useState(false);
 
   if (!isOpen) return null;
@@ -98,7 +98,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               </button>
             </div>
             <p className="form-help">
-              Your API Key is saved locally in your browser's <code>localStorage</code> and never sent to any external server other than Google's Gemini API. 
+              {useProxy ? (
+                <>
+                  Optionally add your own API key to use instead of the server key. It is saved locally in your browser's <code>localStorage</code> and never sent to our server.
+                </>
+              ) : (
+                <>
+                  Your API Key is saved locally in your browser's <code>localStorage</code> and never sent to any external server other than Google's Gemini API. 
+                </>
+              )}
               <br />
               <a
                 href="https://aistudio.google.com/"

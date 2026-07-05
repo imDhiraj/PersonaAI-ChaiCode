@@ -23,10 +23,9 @@ function App() {
   });
 
   const [apiKey, setApiKey] = useState<string>(() => {
-    // Check localStorage first, then fallback to environmental variable
-    const savedKey = localStorage.getItem('gemini_api_key');
-    if (savedKey) return savedKey;
-    return import.meta.env.VITE_GEMINI_API_KEY || '';
+    // Only load user-provided key from localStorage
+    // Never load from env vars — VITE_* vars get baked into the client bundle and expose the key
+    return localStorage.getItem('gemini_api_key') || '';
   });
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
