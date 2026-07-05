@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { Send, Coffee, Terminal, AlertTriangle } from 'lucide-react';
+import { Send, Coffee, Terminal } from 'lucide-react';
 import type { ChatMessage as ChatMessageType } from '../utils/gemini';
 import { ChatMessage } from './ChatMessage';
 
@@ -8,8 +8,6 @@ interface ChatContainerProps {
   activePersona: 'hitesh' | 'piyush';
   onSendMessage: (text: string) => void;
   isGenerating: boolean;
-  apiKeyMissing: boolean;
-  onOpenSettings: () => void;
 }
 
 const HITESH_SUGGESTIONS = [
@@ -31,8 +29,6 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
   activePersona,
   onSendMessage,
   isGenerating,
-  apiKeyMissing,
-  onOpenSettings,
 }) => {
   const [inputText, setInputText] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -127,40 +123,7 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
 
       {/* Input container */}
       <div className="chat-input-container">
-        {apiKeyMissing && (
-          <div 
-            style={{ 
-              maxWidth: '800px', 
-              margin: '0 auto 1rem', 
-              padding: '0.75rem 1rem', 
-              backgroundColor: 'rgba(239, 68, 68, 0.1)', 
-              border: '1px solid rgba(239, 68, 68, 0.2)', 
-              borderRadius: '10px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              fontSize: '0.85rem'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ef4444' }}>
-              <AlertTriangle size={16} />
-              <span>Gemini API Key is missing. The chat will not respond until configured.</span>
-            </div>
-            <button 
-              onClick={onOpenSettings} 
-              style={{ 
-                background: 'none', 
-                border: 'none', 
-                color: 'var(--accent)', 
-                textDecoration: 'underline', 
-                cursor: 'pointer',
-                fontWeight: 500
-              }}
-            >
-              Configure Now
-            </button>
-          </div>
-        )}
+
         <form onSubmit={handleSend} className="chat-input-form">
           <div className="input-wrapper">
             <textarea

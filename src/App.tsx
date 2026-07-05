@@ -3,7 +3,7 @@ import { Header } from './components/Header';
 import { PersonaSelector } from './components/PersonaSelector';
 import { ChatContainer } from './components/ChatContainer';
 import { SettingsModal } from './components/SettingsModal';
-import { streamChatResponse, streamChatResponseProxy, type ChatMessage } from './utils/gemini';
+import { streamChatResponseProxy, type ChatMessage } from './utils/gemini';
 
 function App() {
   // Load state from localStorage if available
@@ -22,31 +22,12 @@ function App() {
     return saved ? JSON.parse(saved) : [];
   });
 
-  const [apiKey, setApiKey] = useState<string>(() => {
-    // Only load user-provided key from localStorage
-    // Never load from env vars — VITE_* vars get baked into the client bundle and expose the key
-    return localStorage.getItem('gemini_api_key') || '';
-  });
+
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [useProxy, setUseProxy] = useState<boolean>(false);
 
-  // Check if server-side proxy is available
-  useEffect(() => {
-    async function checkProxyConfig() {
-      try {
-        const response = await fetch('/api/config');
-        if (response.ok) {
-          const data = await response.json();
-          setUseProxy(!!data.useProxy);
-        }
-      } catch (err) {
-        console.log("No serverless proxy detected, falling back to client-side API calls.");
-      }
-    }
-    checkProxyConfig();
-  }, []);
+
 
   // Sync active persona to localStorage
   useEffect(() => {
@@ -67,11 +48,7 @@ function App() {
     document.body.className = `theme-${activePersona}`;
   }, [activePersona]);
 
-  // Save API key
-  const handleSaveKey = (key: string) => {
-    setApiKey(key);
-    localStorage.setItem('gemini_api_key', key);
-  };
+
 
   // Clear chat history
   const handleClearHistory = () => {
@@ -81,12 +58,6 @@ function App() {
 
   const handleSendMessage = async (text: string) => {
     if (!text.trim()) return;
-
-    // Check if API Key is missing and proxy is not enabled
-    if (!useProxy && !apiKey) {
-      setIsSettingsOpen(true);
-      return;
-    }
 
     const newMessage: ChatMessage = {
       id: crypto.randomUUID(),
@@ -137,27 +108,16 @@ function App() {
         }
       };
 
-      if (apiKey) {
-        // Use user-provided API key directly from the browser
-        await streamChatResponse(
-          apiKey,
-          activePersona,
-          currentHistorySnapshot,
-          text,
-          onChunkCallback
-        );
-      } else if (useProxy) {
-        // Use secure serverless backend proxy
-        await streamChatResponseProxy(
-          activePersona,
-          currentHistorySnapshot,
-          text,
-          onChunkCallback
-        );
-      }
+      // Always use the secure server-side proxy
+      await streamChatResponseProxy(
+        activePersona,
+        currentHistorySnapshot,
+        text,
+        onChunkCallback
+      );
     } catch (error: any) {
       console.error(error);
-      const errorText = `\n\n*(Error: ${error.message || "Something went wrong. Please check your API key."})*`;
+      const errorText = `\n\n*(Error: ${error.message || "Something went wrong. Please try again."})*`;
       if (activePersona === 'hitesh') {
         setHiteshHistory(prev => 
           prev.map(m => m.id === modelMessageId ? { ...m, content: m.content + errorText } : m)
@@ -236,8 +196,6 @@ function App() {
           activePersona={activePersona}
           onSendMessage={handleSendMessage}
           isGenerating={isGenerating}
-          apiKeyMissing={!useProxy && !apiKey}
-          onOpenSettings={() => setIsSettingsOpen(true)}
         />
       </main>
 
@@ -245,10 +203,7 @@ function App() {
       <SettingsModal
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
-        apiKey={apiKey}
-        onSaveKey={handleSaveKey}
         onClearHistory={handleClearHistory}
-        useProxy={useProxy}
       />
     </div>
   );
