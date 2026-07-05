@@ -23,10 +23,10 @@ function App() {
   });
 
   const [apiKey, setApiKey] = useState<string>(() => {
-    // Check environmental variable first, then localStorage
-    const envKey = import.meta.env.VITE_GEMINI_API_KEY;
-    if (envKey) return envKey;
-    return localStorage.getItem('gemini_api_key') || '';
+    // Check localStorage first, then fallback to environmental variable
+    const savedKey = localStorage.getItem('gemini_api_key');
+    if (savedKey) return savedKey;
+    return import.meta.env.VITE_GEMINI_API_KEY || '';
   });
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -138,16 +138,18 @@ function App() {
         }
       };
 
-      if (useProxy) {
-        await streamChatResponseProxy(
+      if (apiKey) {
+        // Use user-provided API key directly from the browser
+        await streamChatResponse(
+          apiKey,
           activePersona,
           currentHistorySnapshot,
           text,
           onChunkCallback
         );
-      } else {
-        await streamChatResponse(
-          apiKey,
+      } else if (useProxy) {
+        // Use secure serverless backend proxy
+        await streamChatResponseProxy(
           activePersona,
           currentHistorySnapshot,
           text,
